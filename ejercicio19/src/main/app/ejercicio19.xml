@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <file:connector name="File" readFromDirectory="C:\Users\salas\Downloads\enviar" autoDelete="true" streaming="true" validateConnections="true" doc:name="File"/>
+    <jms:activemq-connector name="Active_MQ" brokerURL="tcp://M512:61616" validateConnections="true" doc:name="Active MQ"/>
+    <jms:activemq-connector name="Active_MQ1" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
+    <file:connector name="File1" writeToDirectory="C:\Users\salas\Downloads\recibir" autoDelete="true" streaming="true" validateConnections="true" doc:name="File"/>
+    <flow name="Copy_of_ejercicio19Flow">
+        <file:inbound-endpoint path="C:\Users\salas\Downloads\enviar" connector-ref="File" responseTimeout="10000" doc:name="Copy_of_File"/>
+        <file:file-to-byte-array-transformer doc:name="File to Byte Array"/>
+        <gzip-compress-transformer doc:name="Gzip Compress"/>
+        <jms:outbound-endpoint queue="fileName" connector-ref="Active_MQ" doc:name="Copy_of_JMS"/>
+    </flow>
+    <flow name="Copy_of_ejercicio18Flow">
+        <jms:inbound-endpoint queue="fileName" connector-ref="Active_MQ1" doc:name="Copy_of_JMS"/>
+        <gzip-uncompress-transformer doc:name="Gzip Uncompress"/>
+        <file:outbound-endpoint path="C:\Users\salas\Downloads\recibir" outputPattern="#[message.inboundProperties.filename]" connector-ref="File1" responseTimeout="10000" doc:name="Copy_of_File"/>
+    </flow>
+</mule>
